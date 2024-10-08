@@ -34,7 +34,7 @@ class PartsResort():
             order = np.stack([list(range(topN))]*batch, axis=0)
             # self.update(points, order)
         else:
-            order = np.zeros([batch, topN], dtype=np.int)
+            order = np.zeros([batch, topN], dtype=np.int32)
             for i in range(points.shape[0]):
                 topn_points = points[i]
                 order[i] = self.graph_assign(topn_points)

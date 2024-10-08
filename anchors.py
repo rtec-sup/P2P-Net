@@ -37,7 +37,7 @@ def generate_default_anchor_maps(anchors_setting=None, input_shape=(448, 448)):
         aspect_ratios = anchor_info['aspect_ratio']
 
         output_map_shape = np.ceil(input_shape.astype(np.float32) / stride)
-        output_map_shape = output_map_shape.astype(np.int)
+        output_map_shape = output_map_shape.astype(np.int32)
         output_shape = tuple(output_map_shape) + (4,)
         ostart = stride / 2.
         oy = np.arange(ostart, ostart + stride * output_shape[0], stride)
