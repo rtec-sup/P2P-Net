@@ -48,14 +48,18 @@ class CustomDataset():
             if len(img.shape) == 2:
                 img = np.stack([img] * 3, 2)
             img = Image.fromarray(img, mode='RGB')
-            # img = transforms.Resize((600, 600), Image.BILINEAR)(img)
-            # img = transforms.RandomCrop(INPUT_SIZE)(img)
-            # img = transforms.RandomHorizontalFlip()(img)
             img = transforms.Resize((550, 550))(img)
             img = transforms.RandomCrop(INPUT_SIZE, padding=8)(img)
-            # img = transforms.RandomHorizontalFlip()(img)
+            img = transforms.RandomHorizontalFlip()(img)
+            img = transforms.RandomRotation(20)(img)
+            img = transforms.ColorJitter(
+                brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2)(img)
+            img = transforms.RandomAffine(
+                degrees=15, translate=(0.1, 0.1))(img)
+            img = transforms.RandomPerspective(
+                distortion_scale=0.5, p=0.5)(img)
             img = transforms.ToTensor()(img)
-            # img = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])(img)
+            img = transforms.RandomErasing(p=0.5)(img)
             img = transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])(img)
 
         else:
@@ -64,14 +68,9 @@ class CustomDataset():
                 img_path)[:-20, ...], self.test_label[index]
             if len(img.shape) == 2:
                 img = np.stack([img] * 3, 2)
-                # img = img[y1:y2, x1:x2, :]
             img = Image.fromarray(img, mode='RGB')
-            # img = transforms.Resize((600, 600), Image.BILINEAR)(img)
+            img = transforms.Resize(INPUT_SIZE)(img)
             # img = transforms.CenterCrop(INPUT_SIZE)(img)
-            # img = transforms.ToTensor()(img)
-            # img = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])(img)
-            img = transforms.Resize((550, 550))(img)
-            img = transforms.CenterCrop(INPUT_SIZE)(img)
             img = transforms.ToTensor()(img)
             img = transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])(img)
 
