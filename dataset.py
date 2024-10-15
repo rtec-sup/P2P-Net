@@ -15,7 +15,7 @@ class CustomDataset():
         self.is_train = is_train
 
         variants = []
-        with open(os.path.join(root, 'data/variants.txt'), 'r', encoding='utf-16') as f:
+        with open(os.path.join(root, 'data/variants.txt'), 'r') as f:
             for line in f:
                 variants.append(line.strip())
 
