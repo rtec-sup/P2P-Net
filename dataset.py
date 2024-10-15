@@ -55,7 +55,7 @@ class CustomDataset():
             img = transforms.ColorJitter(
                 brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2)(img)
             img = transforms.RandomAffine(
-                degrees=15, translate=(0.1, 0.1))(img)
+                degrees=45, translate=(0.1, 0.1))(img)
             img = transforms.RandomPerspective(
                 distortion_scale=0.5, p=0.5)(img)
             img = transforms.ToTensor()(img)

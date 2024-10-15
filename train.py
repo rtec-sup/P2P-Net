@@ -1,8 +1,5 @@
 from __future__ import print_function
-from distutils.log import error
 import os
-from numpy import result_type
-# from pickletools import optimize
 import torch
 import argparse
 import torch.optim as optim
@@ -20,6 +17,8 @@ def train():
                         help="training epochs")
     parser.add_argument('--batch_size', type=int, default=16,
                         help="batch size for training")
+    parser.add_argument('--n_classes', type=int, default=100,
+                        help="batch size for training")
     parser.add_argument('--resume', type=str, default="",
                         help="resume from saved model path")
     parser.add_argument('--dataset_name', type=str,
@@ -33,7 +32,7 @@ def train():
     batch_size = args.batch_size
 
     # Data
-    data_config = {"custom": [87, "./"]}
+    data_config = {"custom": [args.n_classes, "./"]}
     dataset_name = args.dataset_name
     classes_num, data_root = data_config[dataset_name]
     trainset = CustomDataset(root=data_root, is_train=True, data_len=None)
