@@ -27,12 +27,13 @@ def train():
     parser.add_argument('--backbone', type=str,
                         default="resnet50", help="backbone")
     parser.add_argument('--lr', type=float, default=2e-3, help="learning rate")
+    parser.add_argument('--root_data', type=str, default='./')
     args, _ = parser.parse_known_args()
     epochs = args.epochs
     batch_size = args.batch_size
 
     # Data
-    data_config = {"custom": [args.n_classes, "./"]}
+    data_config = {"custom": [args.n_classes, args.root_data]}
     dataset_name = args.dataset_name
     classes_num, data_root = data_config[dataset_name]
     trainset = CustomDataset(root=data_root, is_train=True, data_len=None)
