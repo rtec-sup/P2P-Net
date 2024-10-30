@@ -7,13 +7,13 @@ from clustering import PartsResort
 
 
 class ReducedNetwork(nn.Module):
-    def __init__(self, model, feature_size, num_ftrs, classes_num, topn, flag):
+    def __init__(self, model, im_sz, feature_size, num_ftrs, classes_num, topn, flag):
         super(ReducedNetwork, self).__init__()
 
         self.backbone = model
         self.num_ftrs = num_ftrs
         self.topn = topn
-        self.im_sz = 448
+        self.im_sz = im_sz
         self.pad_side = 224
         self.PR = PartsResort(self.topn, self.num_ftrs//2)
         self.flag = flag
@@ -107,18 +107,19 @@ class ReducedNetwork(nn.Module):
 
 
 class PMG(nn.Module):
-    def __init__(self, model, feature_size, num_ftrs, classes_num, topn):
+    def __init__(self, model, im_sz, feature_size, num_ftrs, classes_num, topn):
         super(PMG, self).__init__()
 
         self.backbone = model
         self.num_ftrs = num_ftrs
         self.topn = topn
-        self.im_sz = 448
+        self.im_sz = im_sz
         self.pad_side = 224
         self.PR = PartsResort(self.topn, self.num_ftrs//2)
 
         self.proposal_net = ProposalNet(self.num_ftrs)
-        _, edge_anchors, _ = generate_default_anchor_maps()
+        _, edge_anchors, _ = generate_default_anchor_maps(
+            input_shape=(self.im_sz, self.im_sz))
         self.edge_anchors = (edge_anchors+self.pad_side).astype(np.int32)
 
         # mlp for regularization
