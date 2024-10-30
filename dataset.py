@@ -10,10 +10,10 @@ INPUT_SIZE = (448, 448)
 
 
 class CustomDataset():
-    def __init__(self, root, is_train=True, data_len=None):
+    def __init__(self, root, is_train=True, data_len=None, input_size=448):
         self.root = root
         self.is_train = is_train
-
+        self.input_size = (input_size, input_size)
         variants = []
         with open(os.path.join(root, 'data/variants.txt'), 'r') as f:
             for line in f:
@@ -49,7 +49,7 @@ class CustomDataset():
                 img = np.stack([img] * 3, 2)
             img = Image.fromarray(img, mode='RGB')
             img = transforms.Resize((550, 550))(img)
-            img = transforms.RandomCrop(INPUT_SIZE, padding=8)(img)
+            img = transforms.RandomCrop(self.input_size, padding=8)(img)
             img = transforms.RandomHorizontalFlip()(img)
             img = transforms.RandomRotation(20)(img)
             img = transforms.ColorJitter(
@@ -69,7 +69,7 @@ class CustomDataset():
             if len(img.shape) == 2:
                 img = np.stack([img] * 3, 2)
             img = Image.fromarray(img, mode='RGB')
-            img = transforms.Resize(INPUT_SIZE)(img)
+            img = transforms.Resize(self.input_size)(img)
             # img = transforms.CenterCrop(INPUT_SIZE)(img)
             img = transforms.ToTensor()(img)
             img = transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])(img)

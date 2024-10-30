@@ -6,6 +6,106 @@ from anchors import generate_default_anchor_maps, hard_nms
 from clustering import PartsResort
 
 
+class ReducedNetwork(nn.Module):
+    def __init__(self, model, feature_size, num_ftrs, classes_num, topn, flag):
+        super(ReducedNetwork, self).__init__()
+
+        self.backbone = model
+        self.num_ftrs = num_ftrs
+        self.topn = topn
+        self.im_sz = 448
+        self.pad_side = 224
+        self.PR = PartsResort(self.topn, self.num_ftrs//2)
+        self.flag = flag
+
+        self.conv_block1 = nn.Sequential(
+            BasicConv(self.num_ftrs//4, feature_size, kernel_size=1,
+                      stride=1, padding=0, relu=True),
+            BasicConv(feature_size, self.num_ftrs//2, kernel_size=3,
+                      stride=1, padding=1, relu=True),
+            nn.AdaptiveMaxPool2d(1)
+        )
+        self.classifier1 = nn.Sequential(
+            nn.BatchNorm1d(self.num_ftrs//2),
+            nn.Linear(self.num_ftrs//2, feature_size),
+            nn.BatchNorm1d(feature_size),
+            nn.ELU(inplace=True),
+            nn.Dropout(0.5),
+            nn.Linear(feature_size, classes_num),
+        )
+
+        # stage 2
+        self.conv_block2 = nn.Sequential(
+            BasicConv(self.num_ftrs//2, feature_size, kernel_size=1,
+                      stride=1, padding=0, relu=True),
+            BasicConv(feature_size, self.num_ftrs//2, kernel_size=3,
+                      stride=1, padding=1, relu=True),
+            nn.AdaptiveMaxPool2d(1)
+        )
+        self.classifier2 = nn.Sequential(
+            nn.BatchNorm1d(self.num_ftrs//2),
+            nn.Linear(self.num_ftrs//2, feature_size),
+            nn.BatchNorm1d(feature_size),
+            nn.ELU(inplace=True),
+            nn.Dropout(0.5),
+            nn.Linear(feature_size, classes_num),
+        )
+
+        # stage 3
+        self.conv_block3 = nn.Sequential(
+            BasicConv(self.num_ftrs, feature_size, kernel_size=1,
+                      stride=1, padding=0, relu=True),
+            BasicConv(feature_size, self.num_ftrs//2, kernel_size=3,
+                      stride=1, padding=1, relu=True),
+            nn.AdaptiveMaxPool2d(1)
+        )
+        self.classifier3 = nn.Sequential(
+            nn.BatchNorm1d(self.num_ftrs//2),
+            nn.Linear(self.num_ftrs//2, feature_size),
+            nn.BatchNorm1d(feature_size),
+            nn.ELU(inplace=True),
+            nn.Dropout(0.5),
+            nn.Linear(feature_size, classes_num),
+        )
+
+        # concat features from different stages
+        self.classifier_concat = nn.Sequential(
+            nn.BatchNorm1d(self.num_ftrs//2 * 3),
+            nn.Linear(self.num_ftrs//2 * 3, feature_size),
+            nn.BatchNorm1d(feature_size),
+            nn.ELU(inplace=True),
+            nn.Linear(feature_size, classes_num),
+        )
+
+        self.activations = {}
+        self.gradients = {}
+
+    def save_gradient(self, grad, name):
+        self.gradients[name] = grad
+
+    def forward(self, x):
+        _, _, f1, f2, f3 = self.backbone(x)
+        if self.flag == "heatmap":
+            f1.register_hook(lambda grad: self.save_gradient(grad, 'f1'))
+            f2.register_hook(lambda grad: self.save_gradient(grad, 'f2'))
+            f3.register_hook(lambda grad: self.save_gradient(grad, 'f3'))
+            self.activations['f1'] = f1
+            self.activations['f2'] = f2
+            self.activations['f3'] = f3
+
+        batch = x.shape[0]
+
+        f1 = self.conv_block1(f1).view(batch, -1)
+        f2 = self.conv_block2(f2).view(batch, -1)
+        f3 = self.conv_block3(f3).view(batch, -1)
+        y1 = self.classifier1(f1)
+        y2 = self.classifier2(f2)
+        y3 = self.classifier3(f3)
+        y4 = self.classifier_concat(torch.cat((f1, f2, f3), -1))
+
+        return y1, y2, y3, y4
+
+
 class PMG(nn.Module):
     def __init__(self, model, feature_size, num_ftrs, classes_num, topn):
         super(PMG, self).__init__()

@@ -19,6 +19,8 @@ def train():
                         help="batch size for training")
     parser.add_argument('--n_classes', type=int, default=100,
                         help="batch size for training")
+    parser.add_argument('--input_size', type=int, default=448,
+                        help="input size of image")
     parser.add_argument('--resume', type=str, default="",
                         help="resume from saved model path")
     parser.add_argument('--dataset_name', type=str,
@@ -36,8 +38,10 @@ def train():
     data_config = {"custom": [args.n_classes, args.root_data]}
     dataset_name = args.dataset_name
     classes_num, data_root = data_config[dataset_name]
-    trainset = CustomDataset(root=data_root, is_train=True, data_len=None)
-    testset = CustomDataset(root=data_root, is_train=False, data_len=None)
+    trainset = CustomDataset(
+        root=data_root, is_train=True, data_len=None, input_size=args.input_size)
+    testset = CustomDataset(root=data_root, is_train=False,
+                            data_len=None, input_size=args.input_size)
 
     num_workers = 16 if torch.cuda.is_available() else 0
     trainloader = torch.utils.data.DataLoader(
