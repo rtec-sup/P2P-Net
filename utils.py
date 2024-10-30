@@ -19,7 +19,7 @@ def cosine_anneal_schedule(t, nb_epoch, lr):
     return float(lr / 2 * cos_out)
 
 
-def load_model(backbone, pretrain=True, require_grad=True, classes_num=200, topn=4):
+def load_model(backbone, pretrain=True, require_grad=True, im_sz=448, classes_num=200, topn=4):
     print('==> Building model..')
     feature_size = 512
     if backbone == 'resnet50':
@@ -27,19 +27,19 @@ def load_model(backbone, pretrain=True, require_grad=True, classes_num=200, topn
         net = resnet50(pretrained=pretrain)
         for param in net.parameters():
             param.requires_grad = require_grad
-        net = PMG(net, feature_size, num_ftrs, classes_num, topn=topn)
+        net = PMG(net, im_sz, feature_size, num_ftrs, classes_num, topn=topn)
     elif backbone == 'resnet101':
         num_ftrs = 2048
         net = resnet101(pretrained=pretrain)
         for param in net.parameters():
             param.requires_grad = require_grad
-        net = PMG(net, feature_size, num_ftrs, classes_num)
+        net = PMG(net, im_sz, feature_size, num_ftrs, classes_num)
     elif backbone == 'resnet34':
         num_ftrs = 512
         net = resnet34(pretrained=pretrain)
         for param in net.parameters():
             param.requires_grad = require_grad
-        net = PMG(net, feature_size, num_ftrs, classes_num, topn=topn)
+        net = PMG(net, im_sz, feature_size, num_ftrs, classes_num, topn=topn)
 
     return net
 

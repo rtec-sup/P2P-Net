@@ -57,7 +57,7 @@ def train():
         net = torch.load(args.resume)
     else:
         net = load_model(backbone=args.backbone, pretrain=True,
-                         require_grad=True, classes_num=classes_num, topn=topn)
+                         require_grad=True, im_sz=args.input_size, classes_num=classes_num, topn=topn)
     if torch.cuda.is_available():
         device = torch.device('cuda')
         net = net.to(device)
