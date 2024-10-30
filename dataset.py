@@ -48,16 +48,16 @@ class CustomDataset():
             if len(img.shape) == 2:
                 img = np.stack([img] * 3, 2)
             img = Image.fromarray(img, mode='RGB')
-            img = transforms.Resize((550, 550))(img)
-            img = transforms.RandomCrop(self.input_size, padding=8)(img)
+            img = transforms.Resize(self.input_size)(img)
+            # img = transforms.RandomCrop(self.input_size, padding=8)(img)
             img = transforms.RandomHorizontalFlip()(img)
             img = transforms.RandomRotation(20)(img)
             img = transforms.ColorJitter(
                 brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2)(img)
-            img = transforms.RandomAffine(
-                degrees=45, translate=(0.1, 0.1))(img)
-            img = transforms.RandomPerspective(
-                distortion_scale=0.5, p=0.5)(img)
+            # img = transforms.RandomAffine(
+            #     degrees=45, translate=(0.1, 0.1))(img)
+            # img = transforms.RandomPerspective(
+            #     distortion_scale=0.5, p=0.5)(img)
             img = transforms.ToTensor()(img)
             img = transforms.RandomErasing(p=0.5)(img)
             img = transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])(img)
