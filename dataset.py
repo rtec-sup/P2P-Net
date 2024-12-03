@@ -6,10 +6,27 @@ from PIL import Image
 from torchvision import transforms
 from ultralytics import YOLO
 
-from utils import yolo_detect
 # from config import INPUT_SIZE
 INPUT_SIZE = (448, 448)
 yolo_model = YOLO('checkpoint/yolo_detect_bag_watch.pt')
+
+
+def yolo_detect(yolo_model, image):
+    '''
+        Detect object in image (only 1 object in image)
+    '''
+
+    results = yolo_model.predict(image, show=False)
+    boxes = results[0].boxes.xyxy.cpu().tolist()
+    clss = results[0].boxes.cls.cpu().tolist()
+    crop_obj = None
+    if boxes is not None:
+        for box, cls in zip(boxes, clss):
+            if cls == 1:
+                crop_obj = image.crop(
+                    (int(box[0]) - 20, int(box[1]) - 20, int(box[2]) + 20, int(box[3]) + 20))
+
+    return crop_obj
 
 
 class CustomDataset():
