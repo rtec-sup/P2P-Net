@@ -4,11 +4,11 @@ import imageio as reader
 import os
 from PIL import Image
 from torchvision import transforms
-from ultralytics import YOLO
+# from ultralytics import YOLO
 
 # from config import INPUT_SIZE
 INPUT_SIZE = (448, 448)
-yolo_model = YOLO('checkpoint/yolo_detect_bag_watch.pt')
+# yolo_model = YOLO('checkpoint/yolo_detect_bag_watch.pt')
 
 
 def yolo_detect(yolo_model, image):
@@ -68,7 +68,7 @@ class CustomDataset():
             if len(img.shape) == 2:
                 img = np.stack([img] * 3, 2)
             img = Image.fromarray(img, mode='RGB')
-            img = transforms.Resize(668)(img)
+            img = transforms.Resize(600)(img)
             img = transforms.RandomCrop(self.input_size)(img)
             # img = transforms.RandomHorizontalFlip()(img)
             img = transforms.RandomRotation(20)(img)
@@ -86,12 +86,14 @@ class CustomDataset():
                 img = np.stack([img] * 3, 2)
             img = Image.fromarray(img, mode='RGB')
             # img = transforms.CenterCrop(INPUT_SIZE)(img)
-            image = yolo_detect(yolo_model, img)
-            if image == None:
-                img = transforms.CenterCrop(INPUT_SIZE)(img)
+            # image = yolo_detect(yolo_model, img)
+            # if image == None:
+            # img = transforms.Resize(600)(img)
+            if 'cropped' in img_path:
+                img = transforms.Resize(INPUT_SIZE)(img)
             else:
-                image = transforms.Resize(INPUT_SIZE)(image)
-                img = image
+                img = transforms.Resize(600)(img)
+                img = transforms.CenterCrop(INPUT_SIZE)(img)
             img = transforms.ToTensor()(img)
             img = transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])(img)
 

@@ -3,6 +3,7 @@ background/
 test/
 checkpoint/
 *.zip
+*env*/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
