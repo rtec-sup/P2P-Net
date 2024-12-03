@@ -1,4 +1,7 @@
-data/
+data*/
+background/
+test/
+checkpoint/
 *.zip
 
 # Byte-compiled / optimized / DLL files

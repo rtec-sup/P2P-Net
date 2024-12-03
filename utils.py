@@ -1,9 +1,6 @@
 import numpy as np
-import random
 import torch
-import torchvision
 from torch.autograd import Variable
-from torchvision import transforms, models
 import torch.nn.functional as F
 from model import *
 from Resnet import *
@@ -136,3 +133,21 @@ def smooth_CE(logits, label, peak):
     loss = torch.mean(-torch.sum(ce, -1))  # batch average
 
     return loss
+
+
+def yolo_detect(yolo_model, image):
+    '''
+        Detect object in image (only 1 object in image)
+    '''
+
+    results = yolo_model.predict(image, show=False)
+    boxes = results[0].boxes.xyxy.cpu().tolist()
+    clss = results[0].boxes.cls.cpu().tolist()
+    crop_obj = None
+    if boxes is not None:
+        for box, cls in zip(boxes, clss):
+            if cls == 1:
+                crop_obj = image.crop(
+                    (int(box[0]) - 20, int(box[1]) - 20, int(box[2]) + 20, int(box[3]) + 20))
+
+    return crop_obj

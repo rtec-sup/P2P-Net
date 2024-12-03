@@ -2,11 +2,14 @@ import numpy as np
 # import scipy.misc as reader
 import imageio as reader
 import os
-import scipy.io as sio
 from PIL import Image
 from torchvision import transforms
+from ultralytics import YOLO
+
+from utils import yolo_detect
 # from config import INPUT_SIZE
 INPUT_SIZE = (448, 448)
+yolo_model = YOLO('checkpoint/yolo_detect_bag_watch.pt')
 
 
 class CustomDataset():
@@ -48,18 +51,14 @@ class CustomDataset():
             if len(img.shape) == 2:
                 img = np.stack([img] * 3, 2)
             img = Image.fromarray(img, mode='RGB')
-            img = transforms.Resize(self.input_size)(img)
-            # img = transforms.RandomCrop(self.input_size, padding=8)(img)
-            img = transforms.RandomHorizontalFlip()(img)
+            img = transforms.Resize(668)(img)
+            img = transforms.RandomCrop(self.input_size)(img)
+            # img = transforms.RandomHorizontalFlip()(img)
             img = transforms.RandomRotation(20)(img)
-            img = transforms.ColorJitter(
-                brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2)(img)
-            # img = transforms.RandomAffine(
-            #     degrees=45, translate=(0.1, 0.1))(img)
-            # img = transforms.RandomPerspective(
-            #     distortion_scale=0.5, p=0.5)(img)
+            # img = transforms.ColorJitter(
+            #     brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2)(img)
             img = transforms.ToTensor()(img)
-            img = transforms.RandomErasing(p=0.5)(img)
+            img = transforms.RandomErasing(p=0.2)(img)
             img = transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])(img)
 
         else:
@@ -69,8 +68,13 @@ class CustomDataset():
             if len(img.shape) == 2:
                 img = np.stack([img] * 3, 2)
             img = Image.fromarray(img, mode='RGB')
-            img = transforms.Resize(self.input_size)(img)
             # img = transforms.CenterCrop(INPUT_SIZE)(img)
+            image = yolo_detect(yolo_model, img)
+            if image == None:
+                img = transforms.CenterCrop(INPUT_SIZE)(img)
+            else:
+                image = transforms.Resize(INPUT_SIZE)(image)
+                img = image
             img = transforms.ToTensor()(img)
             img = transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])(img)
 
